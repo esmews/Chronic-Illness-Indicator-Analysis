@@ -1,0 +1,69 @@
+---
+title: "Chronic Disease Indicator Analysis"
+author: "Mel"
+date: "2024-07-29"
+output: html_document
+---
+# Header
+## Subheader
+
+**bold**
+*italicized*
+
+```{r}
+# reading in file/data
+
+library(readr)
+
+file <- "C:/Users/lissa/Downloads/U.S._Chronic_Disease_Indicators__CDI___2023_Release.csv"
+data <- read.csv(file)
+
+```
+
+```{r}
+#load dplyr
+library(tidyverse)
+```
+```{r}
+# creating a tibble
+
+tbl_data <- tibble(data)
+
+tbl_data
+```
+```{r}
+# Checking column names
+
+colnames(data)
+
+# Renaming function format for later
+
+# {data you are creating or changing} <- rename({data you are using}, {New Name} = {Old name})
+
+# You can add a comma between renamed data to rename mutliple things at a time
+
+# Try to avoid spaces, special punctuation, or numbers in column names when renaming
+```
+```{r}
+# Janitor package helps with lots of naming fixes
+
+library(janitor)
+
+```
+
+```{r}
+sub_data <- select(tbl_data, YearStart, LocationDesc, Topic, Question, StratificationCategory1, DataSource)
+
+sub_data
+```
+
+```{r}
+# Filtering data
+fil_data <- filter(sub_data, DataSource == "Death Certificate", StratificationCategory1 == "Gender")
+
+fil_data
+
+```
+
+
+
