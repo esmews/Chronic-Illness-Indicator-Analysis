@@ -51,6 +51,16 @@ fil_data <- filter(sub_data, DataSource == "Death Certificate", StratificationCa
 fil_data
 
 ```
+```{r}
+# Check which types of Cancers killed the most, and where + when 
+
+pull(fil_data, "LocationDesc") %>% table()
+
+data
+length(unique(fil_data$LocationDesc))
+
+
+```
 
 
 
