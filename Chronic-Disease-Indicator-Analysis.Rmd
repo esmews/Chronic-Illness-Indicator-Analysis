@@ -1,0 +1,80 @@
+---
+title: "Chronic Disease Indicator Analysis"
+author: "Mel"
+date: "2024-07-29"
+output: html_document
+---
+# Header
+## Subheader
+
+**bold**
+*italicized*
+```{r}
+# reading in file/data
+
+library(readr)
+
+file <- "C:/Users/lissa/Downloads/U.S._Chronic_Disease_Indicators__CDI___2023_Release.csv"
+data <- read.csv(file)
+
+```
+
+```{r}
+# Load dplyr
+library(tidyverse)
+
+# Janitor package helps with lots of naming fixes
+library(janitor)
+```
+
+```{r}
+# creating a tibble
+
+tbl_data <- tibble(data)
+```
+
+
+
+```{r}
+sub_data <- select(tbl_data, 
+                   YearStart, 
+                   YearEnd, 
+                   LocationDesc, 
+                   Topic, 
+                   Question, 
+                   StratificationCategory1, 
+                   Stratification1, 
+                   DataSource, 
+                   DataValue)
+```
+
+
+```{r}
+# Filtering data
+fil_data <- filter(sub_data, 
+                   DataSource == "Death Certificate", 
+                   StratificationCategory1 == "Gender",
+                   Stratification1 == "Female",
+                   Question == "Cancer of the female breast, mortality")
+
+fil_data[!fil_data$LocationDesc %in% "United States",]
+
+fil_data
+
+pull(fil_data, "Question") %>% table()
+
+fil_data <- unite(fil_data, YearStart, YearEnd, sep = "-", col = "Years", remove = TRUE)
+
+
+```
+```{r}
+# Check which types of Cancers killed the most, and where + when 
+
+pull(fil_data, "Years") %>% table()
+
+
+
+```
+
+
+
