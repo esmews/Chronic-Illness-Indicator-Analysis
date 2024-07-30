@@ -368,7 +368,7 @@ library(readr)
 
 file &lt;- &quot;C:/Users/lissa/Downloads/U.S._Chronic_Disease_Indicators__CDI___2023_Release.csv&quot;
 data &lt;- read.csv(file)</code></pre>
-<pre class="r"><code>#load dplyr
+<pre class="r"><code># Load dplyr
 library(tidyverse)</code></pre>
 <pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ## ✔ dplyr     1.1.4     ✔ purrr     1.0.2
@@ -379,6 +379,14 @@ library(tidyverse)</code></pre>
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code># Janitor package helps with lots of naming fixes
+library(janitor)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;janitor&#39;
+## 
+## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     chisq.test, fisher.test</code></pre>
 <pre class="r"><code># creating a tibble
 
 tbl_data &lt;- tibble(data)
@@ -404,31 +412,45 @@ tbl_data</code></pre>
 ## #   LowConfidenceLimit &lt;dbl&gt;, HighConfidenceLimit &lt;dbl&gt;,
 ## #   StratificationCategory1 &lt;chr&gt;, Stratification1 &lt;chr&gt;,
 ## #   StratificationCategory2 &lt;lgl&gt;, Stratification2 &lt;lgl&gt;, …</code></pre>
-<pre class="r"><code># Checking column names
+<pre class="r"><code>sub_data &lt;- select(tbl_data, YearStart, LocationDesc, Topic, Question, StratificationCategory1, Stratification1, DataSource)
 
-colnames(data)</code></pre>
-<pre><code>##  [1] &quot;YearStart&quot;                 &quot;YearEnd&quot;                  
-##  [3] &quot;LocationAbbr&quot;              &quot;LocationDesc&quot;             
-##  [5] &quot;DataSource&quot;                &quot;Topic&quot;                    
-##  [7] &quot;Question&quot;                  &quot;Response&quot;                 
-##  [9] &quot;DataValueUnit&quot;             &quot;DataValueType&quot;            
-## [11] &quot;DataValue&quot;                 &quot;DataValueAlt&quot;             
-## [13] &quot;DataValueFootnoteSymbol&quot;   &quot;DatavalueFootnote&quot;        
-## [15] &quot;LowConfidenceLimit&quot;        &quot;HighConfidenceLimit&quot;      
-## [17] &quot;StratificationCategory1&quot;   &quot;Stratification1&quot;          
-## [19] &quot;StratificationCategory2&quot;   &quot;Stratification2&quot;          
-## [21] &quot;StratificationCategory3&quot;   &quot;Stratification3&quot;          
-## [23] &quot;GeoLocation&quot;               &quot;ResponseID&quot;               
-## [25] &quot;LocationID&quot;                &quot;TopicID&quot;                  
-## [27] &quot;QuestionID&quot;                &quot;DataValueTypeID&quot;          
-## [29] &quot;StratificationCategoryID1&quot; &quot;StratificationID1&quot;        
-## [31] &quot;StratificationCategoryID2&quot; &quot;StratificationID2&quot;        
-## [33] &quot;StratificationCategoryID3&quot; &quot;StratificationID3&quot;</code></pre>
-<pre class="r"><code># Renaming function format for later
+sub_data</code></pre>
+<pre><code>## # A tibble: 1,185,676 × 7
+##    YearStart LocationDesc  Topic Question StratificationCatego…¹ Stratification1
+##        &lt;int&gt; &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;                  &lt;chr&gt;          
+##  1      2014 Arkansas      Asth… Hospita… Gender                 Male           
+##  2      2018 Colorado      Asth… Hospita… Overall                Overall        
+##  3      2018 District of … Asth… Hospita… Overall                Overall        
+##  4      2017 Georgia       Asth… Hospita… Gender                 Female         
+##  5      2010 Michigan      Asth… Hospita… Race/Ethnicity         Hispanic       
+##  6      2015 Montana       Asth… Hospita… Race/Ethnicity         Hispanic       
+##  7      2013 Oregon        Asth… Hospita… Gender                 Male           
+##  8      2013 Puerto Rico   Asth… Hospita… Overall                Overall        
+##  9      2017 Puerto Rico   Asth… Hospita… Overall                Overall        
+## 10      2010 Wisconsin     Asth… Hospita… Gender                 Male           
+## # ℹ 1,185,666 more rows
+## # ℹ abbreviated name: ¹​StratificationCategory1
+## # ℹ 1 more variable: DataSource &lt;chr&gt;</code></pre>
+<pre class="r"><code># Filtering data
+fil_data &lt;- filter(sub_data, DataSource == &quot;Death Certificate&quot;, StratificationCategory1 == &quot;Gender&quot;)
 
-# {data you are creating or changing} &lt;- rename({data you are using}, {New Name} = {Old name})
-
-# Try to avoid spaces, special punctuation, or numbers in column names when renaming</code></pre>
+fil_data</code></pre>
+<pre><code>## # A tibble: 19,968 × 7
+##    YearStart LocationDesc  Topic Question StratificationCatego…¹ Stratification1
+##        &lt;int&gt; &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;                  &lt;chr&gt;          
+##  1      2008 New York      Canc… Cancer … Gender                 Male           
+##  2      2009 New York      Canc… Cancer … Gender                 Male           
+##  3      2011 New York      Canc… Cancer … Gender                 Male           
+##  4      2012 New York      Canc… Cancer … Gender                 Male           
+##  5      2013 Colorado      Canc… Cancer … Gender                 Male           
+##  6      2012 Indiana       Canc… Cancer … Gender                 Male           
+##  7      2014 North Caroli… Canc… Cancer … Gender                 Male           
+##  8      2008 South Caroli… Canc… Cancer … Gender                 Male           
+##  9      2008 Virginia      Canc… Cancer … Gender                 Male           
+## 10      2014 Alabama       Canc… Invasiv… Gender                 Female         
+## # ℹ 19,958 more rows
+## # ℹ abbreviated name: ¹​StratificationCategory1
+## # ℹ 1 more variable: DataSource &lt;chr&gt;</code></pre>
 </div>
 </div>
 

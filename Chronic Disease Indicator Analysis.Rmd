@@ -9,7 +9,6 @@ output: html_document
 
 **bold**
 *italicized*
-
 ```{r}
 # reading in file/data
 
@@ -21,9 +20,13 @@ data <- read.csv(file)
 ```
 
 ```{r}
-#load dplyr
+# Load dplyr
 library(tidyverse)
+
+# Janitor package helps with lots of naming fixes
+library(janitor)
 ```
+
 ```{r}
 # creating a tibble
 
@@ -31,31 +34,15 @@ tbl_data <- tibble(data)
 
 tbl_data
 ```
-```{r}
-# Checking column names
 
-colnames(data)
 
-# Renaming function format for later
-
-# {data you are creating or changing} <- rename({data you are using}, {New Name} = {Old name})
-
-# You can add a comma between renamed data to rename mutliple things at a time
-
-# Try to avoid spaces, special punctuation, or numbers in column names when renaming
-```
-```{r}
-# Janitor package helps with lots of naming fixes
-
-library(janitor)
-
-```
 
 ```{r}
-sub_data <- select(tbl_data, YearStart, LocationDesc, Topic, Question, StratificationCategory1, DataSource)
+sub_data <- select(tbl_data, YearStart, LocationDesc, Topic, Question, StratificationCategory1, Stratification1, DataSource)
 
 sub_data
 ```
+
 
 ```{r}
 # Filtering data
