@@ -389,68 +389,69 @@ library(janitor)</code></pre>
 ##     chisq.test, fisher.test</code></pre>
 <pre class="r"><code># creating a tibble
 
-tbl_data &lt;- tibble(data)
-
-tbl_data</code></pre>
-<pre><code>## # A tibble: 1,185,676 × 34
-##    YearStart YearEnd LocationAbbr LocationDesc         DataSource Topic Question
-##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;                &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;   
-##  1      2014    2014 AR           Arkansas             SEDD; SID  Asth… Hospita…
-##  2      2018    2018 CO           Colorado             SEDD; SID  Asth… Hospita…
-##  3      2018    2018 DC           District of Columbia SEDD; SID  Asth… Hospita…
-##  4      2017    2017 GA           Georgia              SEDD; SID  Asth… Hospita…
-##  5      2010    2010 MI           Michigan             SEDD; SID  Asth… Hospita…
-##  6      2015    2015 MT           Montana              SEDD; SID  Asth… Hospita…
-##  7      2013    2013 OR           Oregon               SEDD; SID  Asth… Hospita…
-##  8      2013    2013 PR           Puerto Rico          SEDD; SID  Asth… Hospita…
-##  9      2017    2017 PR           Puerto Rico          SEDD; SID  Asth… Hospita…
-## 10      2010    2010 WI           Wisconsin            SEDD; SID  Asth… Hospita…
-## # ℹ 1,185,666 more rows
-## # ℹ 27 more variables: Response &lt;lgl&gt;, DataValueUnit &lt;chr&gt;,
-## #   DataValueType &lt;chr&gt;, DataValue &lt;chr&gt;, DataValueAlt &lt;dbl&gt;,
-## #   DataValueFootnoteSymbol &lt;chr&gt;, DatavalueFootnote &lt;chr&gt;,
-## #   LowConfidenceLimit &lt;dbl&gt;, HighConfidenceLimit &lt;dbl&gt;,
-## #   StratificationCategory1 &lt;chr&gt;, Stratification1 &lt;chr&gt;,
-## #   StratificationCategory2 &lt;lgl&gt;, Stratification2 &lt;lgl&gt;, …</code></pre>
-<pre class="r"><code>sub_data &lt;- select(tbl_data, YearStart, LocationDesc, Topic, Question, StratificationCategory1, Stratification1, DataSource)
-
-sub_data</code></pre>
-<pre><code>## # A tibble: 1,185,676 × 7
-##    YearStart LocationDesc  Topic Question StratificationCatego…¹ Stratification1
-##        &lt;int&gt; &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;                  &lt;chr&gt;          
-##  1      2014 Arkansas      Asth… Hospita… Gender                 Male           
-##  2      2018 Colorado      Asth… Hospita… Overall                Overall        
-##  3      2018 District of … Asth… Hospita… Overall                Overall        
-##  4      2017 Georgia       Asth… Hospita… Gender                 Female         
-##  5      2010 Michigan      Asth… Hospita… Race/Ethnicity         Hispanic       
-##  6      2015 Montana       Asth… Hospita… Race/Ethnicity         Hispanic       
-##  7      2013 Oregon        Asth… Hospita… Gender                 Male           
-##  8      2013 Puerto Rico   Asth… Hospita… Overall                Overall        
-##  9      2017 Puerto Rico   Asth… Hospita… Overall                Overall        
-## 10      2010 Wisconsin     Asth… Hospita… Gender                 Male           
-## # ℹ 1,185,666 more rows
-## # ℹ abbreviated name: ¹​StratificationCategory1
-## # ℹ 1 more variable: DataSource &lt;chr&gt;</code></pre>
+tbl_data &lt;- tibble(data)</code></pre>
+<pre class="r"><code>sub_data &lt;- select(tbl_data, 
+                   YearStart, 
+                   YearEnd, 
+                   LocationDesc, 
+                   Topic, 
+                   Question, 
+                   StratificationCategory1, 
+                   Stratification1, 
+                   DataSource, 
+                   DataValue)</code></pre>
 <pre class="r"><code># Filtering data
-fil_data &lt;- filter(sub_data, DataSource == &quot;Death Certificate&quot;, StratificationCategory1 == &quot;Gender&quot;)
+fil_data &lt;- filter(sub_data, 
+                   DataSource == &quot;Death Certificate&quot;, 
+                   StratificationCategory1 == &quot;Gender&quot;,
+                   Stratification1 == &quot;Female&quot;,
+                   Question == &quot;Cancer of the female breast, mortality&quot;)
 
-fil_data</code></pre>
-<pre><code>## # A tibble: 19,968 × 7
-##    YearStart LocationDesc  Topic Question StratificationCatego…¹ Stratification1
-##        &lt;int&gt; &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;                  &lt;chr&gt;          
-##  1      2008 New York      Canc… Cancer … Gender                 Male           
-##  2      2009 New York      Canc… Cancer … Gender                 Male           
-##  3      2011 New York      Canc… Cancer … Gender                 Male           
-##  4      2012 New York      Canc… Cancer … Gender                 Male           
-##  5      2013 Colorado      Canc… Cancer … Gender                 Male           
-##  6      2012 Indiana       Canc… Cancer … Gender                 Male           
-##  7      2014 North Caroli… Canc… Cancer … Gender                 Male           
-##  8      2008 South Caroli… Canc… Cancer … Gender                 Male           
-##  9      2008 Virginia      Canc… Cancer … Gender                 Male           
-## 10      2014 Alabama       Canc… Invasiv… Gender                 Female         
-## # ℹ 19,958 more rows
+fil_data[!fil_data$LocationDesc %in% &quot;United States&quot;,]</code></pre>
+<pre><code>## # A tibble: 1,224 × 9
+##    YearStart YearEnd LocationDesc   Topic  Question       StratificationCatego…¹
+##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;                 
+##  1      2010    2014 Georgia        Cancer Cancer of the… Gender                
+##  2      2011    2015 Utah           Cancer Cancer of the… Gender                
+##  3      2009    2013 Virginia       Cancer Cancer of the… Gender                
+##  4      2012    2016 Virginia       Cancer Cancer of the… Gender                
+##  5      2009    2013 Missouri       Cancer Cancer of the… Gender                
+##  6      2008    2012 New Jersey     Cancer Cancer of the… Gender                
+##  7      2013    2017 Virginia       Cancer Cancer of the… Gender                
+##  8      2014    2018 Minnesota      Cancer Cancer of the… Gender                
+##  9      2009    2013 Vermont        Cancer Cancer of the… Gender                
+## 10      2010    2014 North Carolina Cancer Cancer of the… Gender                
+## # ℹ 1,214 more rows
 ## # ℹ abbreviated name: ¹​StratificationCategory1
-## # ℹ 1 more variable: DataSource &lt;chr&gt;</code></pre>
+## # ℹ 3 more variables: Stratification1 &lt;chr&gt;, DataSource &lt;chr&gt;, DataValue &lt;chr&gt;</code></pre>
+<pre class="r"><code>fil_data</code></pre>
+<pre><code>## # A tibble: 1,248 × 9
+##    YearStart YearEnd LocationDesc  Topic  Question        StratificationCatego…¹
+##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;         &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;                 
+##  1      2010    2014 Georgia       Cancer Cancer of the … Gender                
+##  2      2011    2015 United States Cancer Cancer of the … Gender                
+##  3      2011    2015 Utah          Cancer Cancer of the … Gender                
+##  4      2009    2013 Virginia      Cancer Cancer of the … Gender                
+##  5      2012    2016 Virginia      Cancer Cancer of the … Gender                
+##  6      2009    2013 Missouri      Cancer Cancer of the … Gender                
+##  7      2008    2012 New Jersey    Cancer Cancer of the … Gender                
+##  8      2013    2017 Virginia      Cancer Cancer of the … Gender                
+##  9      2014    2018 Minnesota     Cancer Cancer of the … Gender                
+## 10      2009    2013 Vermont       Cancer Cancer of the … Gender                
+## # ℹ 1,238 more rows
+## # ℹ abbreviated name: ¹​StratificationCategory1
+## # ℹ 3 more variables: Stratification1 &lt;chr&gt;, DataSource &lt;chr&gt;, DataValue &lt;chr&gt;</code></pre>
+<pre class="r"><code>pull(fil_data, &quot;Question&quot;) %&gt;% table()</code></pre>
+<pre><code>## .
+## Cancer of the female breast, mortality 
+##                                   1248</code></pre>
+<pre class="r"><code>fil_data &lt;- unite(fil_data, YearStart, YearEnd, sep = &quot;-&quot;, col = &quot;Years&quot;, remove = TRUE)</code></pre>
+<pre class="r"><code># Check which types of Cancers killed the most, and where + when 
+
+pull(fil_data, &quot;Years&quot;) %&gt;% table()</code></pre>
+<pre><code>## .
+## 2008-2012 2009-2013 2010-2014 2011-2015 2012-2016 2013-2017 2014-2018 2015-2019 
+##       156       156       156       156       156       156       156       156</code></pre>
 </div>
 </div>
 
