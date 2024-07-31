@@ -72,7 +72,7 @@ plt1 <- ggplot(data = fil_data, mapping = aes(x = State,
 geom_col() +
 theme(legend.position = "none", axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
   labs(title = "Breast Cancer Mortality Rate Per State",
-  	      x = "State", y = "Deaths per hundred thousand",
+  	      x = "State", y = "Average deaths per hundred thousand",
   	      caption = "Source: U.S. Chronic Disease Indicators (CDI), 2023 Release")
 
 
