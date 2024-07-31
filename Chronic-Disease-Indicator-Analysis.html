@@ -357,11 +357,6 @@ display: none;
 </div>
 
 
-<div id="header" class="section level1">
-<h1>Header</h1>
-<div id="subheader" class="section level2">
-<h2>Subheader</h2>
-<p><strong>bold</strong> <em>italicized</em></p>
 <pre class="r"><code># reading in file/data
 
 library(readr)
@@ -379,7 +374,12 @@ library(tidyverse)</code></pre>
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-<pre class="r"><code># Janitor package helps with lots of naming fixes
+<pre class="r"><code>library(dplyr)
+
+# Ggplot2
+library(ggplot2)
+
+# Janitor package helps with lots of naming fixes
 library(janitor)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;janitor&#39;
@@ -390,70 +390,596 @@ library(janitor)</code></pre>
 <pre class="r"><code># creating a tibble
 
 tbl_data &lt;- tibble(data)</code></pre>
-<pre class="r"><code>sub_data &lt;- select(tbl_data, 
-                   YearStart, 
-                   YearEnd, 
-                   LocationDesc, 
-                   Topic, 
-                   Question, 
-                   StratificationCategory1, 
-                   Stratification1, 
-                   DataSource, 
-                   DataValue)</code></pre>
 <pre class="r"><code># Filtering data
-fil_data &lt;- filter(sub_data, 
+fil_data &lt;- filter(data, 
                    DataSource == &quot;Death Certificate&quot;, 
                    StratificationCategory1 == &quot;Gender&quot;,
                    Stratification1 == &quot;Female&quot;,
-                   Question == &quot;Cancer of the female breast, mortality&quot;)
+                   Question == &quot;Cancer of the female breast, mortality&quot;,
+                   DataValueType == &quot;Average Annual Age-adjusted Rate&quot;)
 
-fil_data[!fil_data$LocationDesc %in% &quot;United States&quot;,]</code></pre>
-<pre><code>## # A tibble: 1,224 × 9
-##    YearStart YearEnd LocationDesc   Topic  Question       StratificationCatego…¹
-##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;                 
-##  1      2010    2014 Georgia        Cancer Cancer of the… Gender                
-##  2      2011    2015 Utah           Cancer Cancer of the… Gender                
-##  3      2009    2013 Virginia       Cancer Cancer of the… Gender                
-##  4      2012    2016 Virginia       Cancer Cancer of the… Gender                
-##  5      2009    2013 Missouri       Cancer Cancer of the… Gender                
-##  6      2008    2012 New Jersey     Cancer Cancer of the… Gender                
-##  7      2013    2017 Virginia       Cancer Cancer of the… Gender                
-##  8      2014    2018 Minnesota      Cancer Cancer of the… Gender                
-##  9      2009    2013 Vermont        Cancer Cancer of the… Gender                
-## 10      2010    2014 North Carolina Cancer Cancer of the… Gender                
-## # ℹ 1,214 more rows
-## # ℹ abbreviated name: ¹​StratificationCategory1
-## # ℹ 3 more variables: Stratification1 &lt;chr&gt;, DataSource &lt;chr&gt;, DataValue &lt;chr&gt;</code></pre>
-<pre class="r"><code>fil_data</code></pre>
-<pre><code>## # A tibble: 1,248 × 9
-##    YearStart YearEnd LocationDesc  Topic  Question        StratificationCatego…¹
-##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;         &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;                 
-##  1      2010    2014 Georgia       Cancer Cancer of the … Gender                
-##  2      2011    2015 United States Cancer Cancer of the … Gender                
-##  3      2011    2015 Utah          Cancer Cancer of the … Gender                
-##  4      2009    2013 Virginia      Cancer Cancer of the … Gender                
-##  5      2012    2016 Virginia      Cancer Cancer of the … Gender                
-##  6      2009    2013 Missouri      Cancer Cancer of the … Gender                
-##  7      2008    2012 New Jersey    Cancer Cancer of the … Gender                
-##  8      2013    2017 Virginia      Cancer Cancer of the … Gender                
-##  9      2014    2018 Minnesota     Cancer Cancer of the … Gender                
-## 10      2009    2013 Vermont       Cancer Cancer of the … Gender                
-## # ℹ 1,238 more rows
-## # ℹ abbreviated name: ¹​StratificationCategory1
-## # ℹ 3 more variables: Stratification1 &lt;chr&gt;, DataSource &lt;chr&gt;, DataValue &lt;chr&gt;</code></pre>
-<pre class="r"><code>pull(fil_data, &quot;Question&quot;) %&gt;% table()</code></pre>
-<pre><code>## .
-## Cancer of the female breast, mortality 
-##                                   1248</code></pre>
-<pre class="r"><code>fil_data &lt;- unite(fil_data, YearStart, YearEnd, sep = &quot;-&quot;, col = &quot;Years&quot;, remove = TRUE)</code></pre>
-<pre class="r"><code># Check which types of Cancers killed the most, and where + when 
+fil_data &lt;- unite(fil_data, YearStart, YearEnd, sep = &quot;-&quot;, col = &quot;Years&quot;, remove = TRUE)
 
-pull(fil_data, &quot;Years&quot;) %&gt;% table()</code></pre>
+group_by(fil_data, LocationDesc, .add = TRUE)</code></pre>
+<pre><code>## # A tibble: 416 × 33
+## # Groups:   LocationDesc [52]
+##    Years     LocationAbbr LocationDesc  DataSource       Topic Question Response
+##    &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt;            &lt;chr&gt; &lt;chr&gt;    &lt;lgl&gt;   
+##  1 2009-2013 MO           Missouri      Death Certifica… Canc… Cancer … NA      
+##  2 2014-2018 NY           New York      Death Certifica… Canc… Cancer … NA      
+##  3 2014-2018 HI           Hawaii        Death Certifica… Canc… Cancer … NA      
+##  4 2010-2014 SD           South Dakota  Death Certifica… Canc… Cancer … NA      
+##  5 2015-2019 VA           Virginia      Death Certifica… Canc… Cancer … NA      
+##  6 2008-2012 IN           Indiana       Death Certifica… Canc… Cancer … NA      
+##  7 2012-2016 KS           Kansas        Death Certifica… Canc… Cancer … NA      
+##  8 2010-2014 OH           Ohio          Death Certifica… Canc… Cancer … NA      
+##  9 2009-2013 US           United States Death Certifica… Canc… Cancer … NA      
+## 10 2009-2013 MN           Minnesota     Death Certifica… Canc… Cancer … NA      
+## # ℹ 406 more rows
+## # ℹ 26 more variables: DataValueUnit &lt;chr&gt;, DataValueType &lt;chr&gt;,
+## #   DataValue &lt;chr&gt;, DataValueAlt &lt;dbl&gt;, DataValueFootnoteSymbol &lt;chr&gt;,
+## #   DatavalueFootnote &lt;chr&gt;, LowConfidenceLimit &lt;dbl&gt;,
+## #   HighConfidenceLimit &lt;dbl&gt;, StratificationCategory1 &lt;chr&gt;,
+## #   Stratification1 &lt;chr&gt;, StratificationCategory2 &lt;lgl&gt;,
+## #   Stratification2 &lt;lgl&gt;, StratificationCategory3 &lt;lgl&gt;, …</code></pre>
+<pre class="r"><code>pull(fil_data, &quot;Years&quot;) %&gt;% table()</code></pre>
 <pre><code>## .
 ## 2008-2012 2009-2013 2010-2014 2011-2015 2012-2016 2013-2017 2014-2018 2015-2019 
-##       156       156       156       156       156       156       156       156</code></pre>
-</div>
-</div>
+##        52        52        52        52        52        52        52        52</code></pre>
+<pre class="r"><code>fil_data &lt;- filter(fil_data,
+                   Years == &quot;2015-2019&quot;)</code></pre>
+<pre class="r"><code># Renaming Columns
+
+names(fil_data)[names(fil_data) == &quot;LocationDesc&quot;] &lt;- &quot;State&quot;
+names(fil_data)[names(fil_data) == &quot;DataValue&quot;] &lt;- &quot;Deaths&quot;
+
+fil_data</code></pre>
+<pre><code>##        Years LocationAbbr                State        DataSource  Topic
+## 1  2015-2019           VA             Virginia Death Certificate Cancer
+## 2  2015-2019           GA              Georgia Death Certificate Cancer
+## 3  2015-2019           MS          Mississippi Death Certificate Cancer
+## 4  2015-2019           MT              Montana Death Certificate Cancer
+## 5  2015-2019           OK             Oklahoma Death Certificate Cancer
+## 6  2015-2019           OH                 Ohio Death Certificate Cancer
+## 7  2015-2019           OR               Oregon Death Certificate Cancer
+## 8  2015-2019           MI             Michigan Death Certificate Cancer
+## 9  2015-2019           KS               Kansas Death Certificate Cancer
+## 10 2015-2019           MO             Missouri Death Certificate Cancer
+## 11 2015-2019           DC District of Columbia Death Certificate Cancer
+## 12 2015-2019           PA         Pennsylvania Death Certificate Cancer
+## 13 2015-2019           WI            Wisconsin Death Certificate Cancer
+## 14 2015-2019           WA           Washington Death Certificate Cancer
+## 15 2015-2019           NY             New York Death Certificate Cancer
+## 16 2015-2019           VT              Vermont Death Certificate Cancer
+## 17 2015-2019           UT                 Utah Death Certificate Cancer
+## 18 2015-2019           KY             Kentucky Death Certificate Cancer
+## 19 2015-2019           MN            Minnesota Death Certificate Cancer
+## 20 2015-2019           CT          Connecticut Death Certificate Cancer
+## 21 2015-2019           DE             Delaware Death Certificate Cancer
+## 22 2015-2019           LA            Louisiana Death Certificate Cancer
+## 23 2015-2019           MD             Maryland Death Certificate Cancer
+## 24 2015-2019           WY              Wyoming Death Certificate Cancer
+## 25 2015-2019           CO             Colorado Death Certificate Cancer
+## 26 2015-2019           NH        New Hampshire Death Certificate Cancer
+## 27 2015-2019           SD         South Dakota Death Certificate Cancer
+## 28 2015-2019           CA           California Death Certificate Cancer
+## 29 2015-2019           IN              Indiana Death Certificate Cancer
+## 30 2015-2019           NC       North Carolina Death Certificate Cancer
+## 31 2015-2019           HI               Hawaii Death Certificate Cancer
+## 32 2015-2019           ME                Maine Death Certificate Cancer
+## 33 2015-2019           US        United States Death Certificate Cancer
+## 34 2015-2019           TN            Tennessee Death Certificate Cancer
+## 35 2015-2019           FL              Florida Death Certificate Cancer
+## 36 2015-2019           SC       South Carolina Death Certificate Cancer
+## 37 2015-2019           NJ           New Jersey Death Certificate Cancer
+## 38 2015-2019           TX                Texas Death Certificate Cancer
+## 39 2015-2019           AK               Alaska Death Certificate Cancer
+## 40 2015-2019           IA                 Iowa Death Certificate Cancer
+## 41 2015-2019           NV               Nevada Death Certificate Cancer
+## 42 2015-2019           IL             Illinois Death Certificate Cancer
+## 43 2015-2019           ID                Idaho Death Certificate Cancer
+## 44 2015-2019           AR             Arkansas Death Certificate Cancer
+## 45 2015-2019           NE             Nebraska Death Certificate Cancer
+## 46 2015-2019           AZ              Arizona Death Certificate Cancer
+## 47 2015-2019           NM           New Mexico Death Certificate Cancer
+## 48 2015-2019           MA        Massachusetts Death Certificate Cancer
+## 49 2015-2019           AL              Alabama Death Certificate Cancer
+## 50 2015-2019           RI         Rhode Island Death Certificate Cancer
+## 51 2015-2019           WV        West Virginia Death Certificate Cancer
+## 52 2015-2019           ND         North Dakota Death Certificate Cancer
+##                                  Question Response DataValueUnit
+## 1  Cancer of the female breast, mortality       NA   per 100,000
+## 2  Cancer of the female breast, mortality       NA   per 100,000
+## 3  Cancer of the female breast, mortality       NA   per 100,000
+## 4  Cancer of the female breast, mortality       NA   per 100,000
+## 5  Cancer of the female breast, mortality       NA   per 100,000
+## 6  Cancer of the female breast, mortality       NA   per 100,000
+## 7  Cancer of the female breast, mortality       NA   per 100,000
+## 8  Cancer of the female breast, mortality       NA   per 100,000
+## 9  Cancer of the female breast, mortality       NA   per 100,000
+## 10 Cancer of the female breast, mortality       NA   per 100,000
+## 11 Cancer of the female breast, mortality       NA   per 100,000
+## 12 Cancer of the female breast, mortality       NA   per 100,000
+## 13 Cancer of the female breast, mortality       NA   per 100,000
+## 14 Cancer of the female breast, mortality       NA   per 100,000
+## 15 Cancer of the female breast, mortality       NA   per 100,000
+## 16 Cancer of the female breast, mortality       NA   per 100,000
+## 17 Cancer of the female breast, mortality       NA   per 100,000
+## 18 Cancer of the female breast, mortality       NA   per 100,000
+## 19 Cancer of the female breast, mortality       NA   per 100,000
+## 20 Cancer of the female breast, mortality       NA   per 100,000
+## 21 Cancer of the female breast, mortality       NA   per 100,000
+## 22 Cancer of the female breast, mortality       NA   per 100,000
+## 23 Cancer of the female breast, mortality       NA   per 100,000
+## 24 Cancer of the female breast, mortality       NA   per 100,000
+## 25 Cancer of the female breast, mortality       NA   per 100,000
+## 26 Cancer of the female breast, mortality       NA   per 100,000
+## 27 Cancer of the female breast, mortality       NA   per 100,000
+## 28 Cancer of the female breast, mortality       NA   per 100,000
+## 29 Cancer of the female breast, mortality       NA   per 100,000
+## 30 Cancer of the female breast, mortality       NA   per 100,000
+## 31 Cancer of the female breast, mortality       NA   per 100,000
+## 32 Cancer of the female breast, mortality       NA   per 100,000
+## 33 Cancer of the female breast, mortality       NA   per 100,000
+## 34 Cancer of the female breast, mortality       NA   per 100,000
+## 35 Cancer of the female breast, mortality       NA   per 100,000
+## 36 Cancer of the female breast, mortality       NA   per 100,000
+## 37 Cancer of the female breast, mortality       NA   per 100,000
+## 38 Cancer of the female breast, mortality       NA   per 100,000
+## 39 Cancer of the female breast, mortality       NA   per 100,000
+## 40 Cancer of the female breast, mortality       NA   per 100,000
+## 41 Cancer of the female breast, mortality       NA   per 100,000
+## 42 Cancer of the female breast, mortality       NA   per 100,000
+## 43 Cancer of the female breast, mortality       NA   per 100,000
+## 44 Cancer of the female breast, mortality       NA   per 100,000
+## 45 Cancer of the female breast, mortality       NA   per 100,000
+## 46 Cancer of the female breast, mortality       NA   per 100,000
+## 47 Cancer of the female breast, mortality       NA   per 100,000
+## 48 Cancer of the female breast, mortality       NA   per 100,000
+## 49 Cancer of the female breast, mortality       NA   per 100,000
+## 50 Cancer of the female breast, mortality       NA   per 100,000
+## 51 Cancer of the female breast, mortality       NA   per 100,000
+## 52 Cancer of the female breast, mortality       NA   per 100,000
+##                       DataValueType Deaths DataValueAlt DataValueFootnoteSymbol
+## 1  Average Annual Age-adjusted Rate   20.9         20.9                        
+## 2  Average Annual Age-adjusted Rate   21.1         21.1                        
+## 3  Average Annual Age-adjusted Rate   22.8         22.8                        
+## 4  Average Annual Age-adjusted Rate   19.3         19.3                        
+## 5  Average Annual Age-adjusted Rate   22.5         22.5                        
+## 6  Average Annual Age-adjusted Rate   21.6         21.6                        
+## 7  Average Annual Age-adjusted Rate   19.6         19.6                        
+## 8  Average Annual Age-adjusted Rate   20.4         20.4                        
+## 9  Average Annual Age-adjusted Rate   20.2         20.2                        
+## 10 Average Annual Age-adjusted Rate   20.3         20.3                        
+## 11 Average Annual Age-adjusted Rate   25.4         25.4                        
+## 12 Average Annual Age-adjusted Rate   20.8         20.8                        
+## 13 Average Annual Age-adjusted Rate   18.5         18.5                        
+## 14 Average Annual Age-adjusted Rate   19.5         19.5                        
+## 15 Average Annual Age-adjusted Rate   18.9         18.9                        
+## 16 Average Annual Age-adjusted Rate   17.6         17.6                        
+## 17 Average Annual Age-adjusted Rate   19.8         19.8                        
+## 18 Average Annual Age-adjusted Rate   21.2         21.2                        
+## 19 Average Annual Age-adjusted Rate   17.7         17.7                        
+## 20 Average Annual Age-adjusted Rate   17.3         17.3                        
+## 21 Average Annual Age-adjusted Rate   21.3         21.3                        
+## 22 Average Annual Age-adjusted Rate   22.4         22.4                        
+## 23 Average Annual Age-adjusted Rate   21.0         21.0                        
+## 24 Average Annual Age-adjusted Rate   18.9         18.9                        
+## 25 Average Annual Age-adjusted Rate   18.7         18.7                        
+## 26 Average Annual Age-adjusted Rate   18.1         18.1                        
+## 27 Average Annual Age-adjusted Rate   18.8         18.8                        
+## 28 Average Annual Age-adjusted Rate   19.1         19.1                        
+## 29 Average Annual Age-adjusted Rate   20.4         20.4                        
+## 30 Average Annual Age-adjusted Rate   20.5         20.5                        
+## 31 Average Annual Age-adjusted Rate   16.7         16.7                        
+## 32 Average Annual Age-adjusted Rate   18.1         18.1                        
+## 33 Average Annual Age-adjusted Rate   19.9         19.9                        
+## 34 Average Annual Age-adjusted Rate   21.8         21.8                        
+## 35 Average Annual Age-adjusted Rate   18.7         18.7                        
+## 36 Average Annual Age-adjusted Rate   21.2         21.2                        
+## 37 Average Annual Age-adjusted Rate   20.5         20.5                        
+## 38 Average Annual Age-adjusted Rate   19.9         19.9                        
+## 39 Average Annual Age-adjusted Rate   17.8         17.8                        
+## 40 Average Annual Age-adjusted Rate   18.4         18.4                        
+## 41 Average Annual Age-adjusted Rate   22.0         22.0                        
+## 42 Average Annual Age-adjusted Rate   20.9         20.9                        
+## 43 Average Annual Age-adjusted Rate   21.1         21.1                        
+## 44 Average Annual Age-adjusted Rate   19.5         19.5                        
+## 45 Average Annual Age-adjusted Rate   19.8         19.8                        
+## 46 Average Annual Age-adjusted Rate   18.3         18.3                        
+## 47 Average Annual Age-adjusted Rate   20.2         20.2                        
+## 48 Average Annual Age-adjusted Rate   16.8         16.8                        
+## 49 Average Annual Age-adjusted Rate   21.4         21.4                        
+## 50 Average Annual Age-adjusted Rate   17.6         17.6                        
+## 51 Average Annual Age-adjusted Rate   21.6         21.6                        
+## 52 Average Annual Age-adjusted Rate   18.1         18.1                        
+##    DatavalueFootnote LowConfidenceLimit HighConfidenceLimit
+## 1                                  20.3                21.5
+## 2                                  20.6                21.6
+## 3                                  21.9                23.9
+## 4                                  17.9                20.9
+## 5                                  21.7                23.4
+## 6                                  21.2                22.1
+## 7                                  18.8                20.4
+## 8                                  19.9                20.9
+## 9                                  19.3                21.2
+## 10                                 19.7                21.0
+## 11                                 23.1                27.8
+## 12                                 20.3                21.2
+## 13                                 17.9                19.2
+## 14                                 18.9                20.1
+## 15                                 18.5                19.2
+## 16                                 15.8                19.4
+## 17                                 18.8                20.9
+## 18                                 20.5                22.0
+## 19                                 17.1                18.4
+## 20                                 16.6                18.1
+## 21                                 19.7                22.9
+## 22                                 21.6                23.2
+## 23                                 20.4                21.7
+## 24                                 16.8                21.1
+## 25                                 18.1                19.4
+## 26                                 16.9                19.4
+## 27                                 17.2                20.6
+## 28                                 18.8                19.3
+## 29                                 19.8                21.0
+## 30                                 20.0                21.0
+## 31                                 15.5                17.9
+## 32                                 17.0                19.4
+## 33                                 19.8                20.0
+## 34                                 21.1                22.4
+## 35                                 18.4                19.1
+## 36                                 20.5                22.0
+## 37                                 20.0                21.1
+## 38                                 19.6                20.2
+## 39                                 15.8                20.0
+## 40                                 17.5                19.2
+## 41                                 21.0                23.0
+## 42                                 20.4                21.3
+## 43                                 19.8                22.4
+## 44                                 18.6                20.4
+## 45                                 18.7                21.0
+## 46                                 17.8                18.9
+## 47                                 19.1                21.3
+## 48                                 16.3                17.3
+## 49                                 20.7                22.2
+## 50                                 16.2                19.0
+## 51                                 20.5                22.9
+## 52                                 16.3                20.0
+##    StratificationCategory1 Stratification1 StratificationCategory2
+## 1                   Gender          Female                      NA
+## 2                   Gender          Female                      NA
+## 3                   Gender          Female                      NA
+## 4                   Gender          Female                      NA
+## 5                   Gender          Female                      NA
+## 6                   Gender          Female                      NA
+## 7                   Gender          Female                      NA
+## 8                   Gender          Female                      NA
+## 9                   Gender          Female                      NA
+## 10                  Gender          Female                      NA
+## 11                  Gender          Female                      NA
+## 12                  Gender          Female                      NA
+## 13                  Gender          Female                      NA
+## 14                  Gender          Female                      NA
+## 15                  Gender          Female                      NA
+## 16                  Gender          Female                      NA
+## 17                  Gender          Female                      NA
+## 18                  Gender          Female                      NA
+## 19                  Gender          Female                      NA
+## 20                  Gender          Female                      NA
+## 21                  Gender          Female                      NA
+## 22                  Gender          Female                      NA
+## 23                  Gender          Female                      NA
+## 24                  Gender          Female                      NA
+## 25                  Gender          Female                      NA
+## 26                  Gender          Female                      NA
+## 27                  Gender          Female                      NA
+## 28                  Gender          Female                      NA
+## 29                  Gender          Female                      NA
+## 30                  Gender          Female                      NA
+## 31                  Gender          Female                      NA
+## 32                  Gender          Female                      NA
+## 33                  Gender          Female                      NA
+## 34                  Gender          Female                      NA
+## 35                  Gender          Female                      NA
+## 36                  Gender          Female                      NA
+## 37                  Gender          Female                      NA
+## 38                  Gender          Female                      NA
+## 39                  Gender          Female                      NA
+## 40                  Gender          Female                      NA
+## 41                  Gender          Female                      NA
+## 42                  Gender          Female                      NA
+## 43                  Gender          Female                      NA
+## 44                  Gender          Female                      NA
+## 45                  Gender          Female                      NA
+## 46                  Gender          Female                      NA
+## 47                  Gender          Female                      NA
+## 48                  Gender          Female                      NA
+## 49                  Gender          Female                      NA
+## 50                  Gender          Female                      NA
+## 51                  Gender          Female                      NA
+## 52                  Gender          Female                      NA
+##    Stratification2 StratificationCategory3 Stratification3
+## 1               NA                      NA              NA
+## 2               NA                      NA              NA
+## 3               NA                      NA              NA
+## 4               NA                      NA              NA
+## 5               NA                      NA              NA
+## 6               NA                      NA              NA
+## 7               NA                      NA              NA
+## 8               NA                      NA              NA
+## 9               NA                      NA              NA
+## 10              NA                      NA              NA
+## 11              NA                      NA              NA
+## 12              NA                      NA              NA
+## 13              NA                      NA              NA
+## 14              NA                      NA              NA
+## 15              NA                      NA              NA
+## 16              NA                      NA              NA
+## 17              NA                      NA              NA
+## 18              NA                      NA              NA
+## 19              NA                      NA              NA
+## 20              NA                      NA              NA
+## 21              NA                      NA              NA
+## 22              NA                      NA              NA
+## 23              NA                      NA              NA
+## 24              NA                      NA              NA
+## 25              NA                      NA              NA
+## 26              NA                      NA              NA
+## 27              NA                      NA              NA
+## 28              NA                      NA              NA
+## 29              NA                      NA              NA
+## 30              NA                      NA              NA
+## 31              NA                      NA              NA
+## 32              NA                      NA              NA
+## 33              NA                      NA              NA
+## 34              NA                      NA              NA
+## 35              NA                      NA              NA
+## 36              NA                      NA              NA
+## 37              NA                      NA              NA
+## 38              NA                      NA              NA
+## 39              NA                      NA              NA
+## 40              NA                      NA              NA
+## 41              NA                      NA              NA
+## 42              NA                      NA              NA
+## 43              NA                      NA              NA
+## 44              NA                      NA              NA
+## 45              NA                      NA              NA
+## 46              NA                      NA              NA
+## 47              NA                      NA              NA
+## 48              NA                      NA              NA
+## 49              NA                      NA              NA
+## 50              NA                      NA              NA
+## 51              NA                      NA              NA
+## 52              NA                      NA              NA
+##                                       GeoLocation ResponseID LocationID TopicID
+## 1    POINT (-78.45789046299967 37.54268067400045)         NA         51     CAN
+## 2    POINT (-83.62758034599966 32.83968109300048)         NA         13     CAN
+## 3   POINT (-89.53803082499968 32.745510099000455)         NA         28     CAN
+## 4   POINT (-109.42442064499971 47.06652897200047)         NA         30     CAN
+## 5    POINT (-97.52107021399968 35.47203135600046)         NA         40     CAN
+## 6    POINT (-82.40426005599966 40.06021014100048)         NA         39     CAN
+## 7   POINT (-120.15503132599969 44.56744942400047)         NA         41     CAN
+## 8     POINT (-84.71439026999968 44.6613195430005)         NA         26     CAN
+## 9    POINT (-98.20078122699965 38.34774030000045)         NA         20     CAN
+## 10  POINT (-92.56630005299968 38.635790776000476)         NA         29     CAN
+## 11                   POINT (-77.036871 38.907192)         NA         11     CAN
+## 12   POINT (-77.86070029399963 40.79373015200048)         NA         42     CAN
+## 13   POINT (-89.81637074199966 44.39319117400049)         NA         55     CAN
+## 14  POINT (-120.47001078999972 47.52227862900048)         NA         53     CAN
+## 15   POINT (-75.54397042699964 42.82700103200045)         NA         36     CAN
+## 16   POINT (-72.51764079099962 43.62538123900049)         NA         50     CAN
+## 17 POINT (-111.58713063499971 39.360700171000474)         NA         49     CAN
+## 18  POINT (-84.77497104799966 37.645970271000465)         NA         21     CAN
+## 19   POINT (-94.79420050299967 46.35564873600049)         NA         27     CAN
+## 20   POINT (-72.64984095199964 41.56266102000046)         NA          9     CAN
+## 21  POINT (-75.57774116799965 39.008830667000495)         NA         10     CAN
+## 22   POINT (-92.44568007099969 31.31266064400046)         NA         22     CAN
+## 23   POINT (-76.60926011099963 39.29058096400047)         NA         24     CAN
+## 24  POINT (-108.10983035299967 43.23554134300048)         NA         56     CAN
+## 25 POINT (-106.13361092099967 38.843840757000464)         NA          8     CAN
+## 26   POINT (-71.50036091999965 43.65595011300047)         NA         33     CAN
+## 27  POINT (-100.3735306369997 44.353130053000484)         NA         46     CAN
+## 28  POINT (-120.99999953799971 37.63864012300047)         NA          6     CAN
+## 29  POINT (-86.14996019399968 39.766910452000445)         NA         18     CAN
+## 30  POINT (-79.15925046299964 35.466220975000454)         NA         37     CAN
+## 31 POINT (-157.85774940299973 21.304850435000446)         NA         15     CAN
+## 32  POINT (-68.98503133599962 45.254228894000505)         NA         23     CAN
+## 33                                                        NA         59     CAN
+## 34   POINT (-85.77449091399967 35.68094058000048)         NA         47     CAN
+## 35  POINT (-81.92896053899966 28.932040377000476)         NA         12     CAN
+## 36  POINT (-81.04537120699968 33.998821303000454)         NA         45     CAN
+## 37   POINT (-74.27369128799967 40.13057004800049)         NA         34     CAN
+## 38  POINT (-99.42677020599967 31.827240407000488)         NA         48     CAN
+## 39  POINT (-147.72205903599973 64.84507995700051)         NA          2     CAN
+## 40   POINT (-93.81649055599968 42.46940091300047)         NA         19     CAN
+## 41 POINT (-117.07184056399967 39.493240390000494)         NA         32     CAN
+## 42   POINT (-88.99771017799969 40.48501028300046)         NA         17     CAN
+## 43  POINT (-114.3637300419997 43.682630005000476)         NA         16     CAN
+## 44   POINT (-92.27449074299966 34.74865012400045)         NA          5     CAN
+## 45    POINT (-99.36572062299967 41.6410409880005)         NA         31     CAN
+## 46 POINT (-111.76381127699972 34.865970280000454)         NA          4     CAN
+## 47  POINT (-106.24058098499967 34.52088095200048)         NA         35     CAN
+## 48   POINT (-72.08269067499964 42.27687047000046)         NA         25     CAN
+## 49   POINT (-86.63186076199969 32.84057112200048)         NA          1     CAN
+## 50   POINT (-71.52247031399963 41.70828019300046)         NA         44     CAN
+## 51   POINT (-80.71264013499967 38.66551020200046)         NA         54     CAN
+## 52  POINT (-100.11842104899966 47.47531977900047)         NA         38     CAN
+##    QuestionID  DataValueTypeID StratificationCategoryID1 StratificationID1
+## 1      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 2      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 3      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 4      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 5      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 6      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 7      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 8      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 9      CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 10     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 11     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 12     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 13     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 14     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 15     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 16     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 17     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 18     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 19     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 20     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 21     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 22     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 23     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 24     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 25     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 26     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 27     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 28     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 29     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 30     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 31     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 32     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 33     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 34     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 35     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 36     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 37     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 38     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 39     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 40     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 41     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 42     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 43     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 44     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 45     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 46     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 47     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 48     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 49     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 50     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 51     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+## 52     CAN5_2 AVGANNAGEADJRATE                    GENDER              GENF
+##    StratificationCategoryID2 StratificationID2 StratificationCategoryID3
+## 1                         NA                NA                        NA
+## 2                         NA                NA                        NA
+## 3                         NA                NA                        NA
+## 4                         NA                NA                        NA
+## 5                         NA                NA                        NA
+## 6                         NA                NA                        NA
+## 7                         NA                NA                        NA
+## 8                         NA                NA                        NA
+## 9                         NA                NA                        NA
+## 10                        NA                NA                        NA
+## 11                        NA                NA                        NA
+## 12                        NA                NA                        NA
+## 13                        NA                NA                        NA
+## 14                        NA                NA                        NA
+## 15                        NA                NA                        NA
+## 16                        NA                NA                        NA
+## 17                        NA                NA                        NA
+## 18                        NA                NA                        NA
+## 19                        NA                NA                        NA
+## 20                        NA                NA                        NA
+## 21                        NA                NA                        NA
+## 22                        NA                NA                        NA
+## 23                        NA                NA                        NA
+## 24                        NA                NA                        NA
+## 25                        NA                NA                        NA
+## 26                        NA                NA                        NA
+## 27                        NA                NA                        NA
+## 28                        NA                NA                        NA
+## 29                        NA                NA                        NA
+## 30                        NA                NA                        NA
+## 31                        NA                NA                        NA
+## 32                        NA                NA                        NA
+## 33                        NA                NA                        NA
+## 34                        NA                NA                        NA
+## 35                        NA                NA                        NA
+## 36                        NA                NA                        NA
+## 37                        NA                NA                        NA
+## 38                        NA                NA                        NA
+## 39                        NA                NA                        NA
+## 40                        NA                NA                        NA
+## 41                        NA                NA                        NA
+## 42                        NA                NA                        NA
+## 43                        NA                NA                        NA
+## 44                        NA                NA                        NA
+## 45                        NA                NA                        NA
+## 46                        NA                NA                        NA
+## 47                        NA                NA                        NA
+## 48                        NA                NA                        NA
+## 49                        NA                NA                        NA
+## 50                        NA                NA                        NA
+## 51                        NA                NA                        NA
+## 52                        NA                NA                        NA
+##    StratificationID3
+## 1                 NA
+## 2                 NA
+## 3                 NA
+## 4                 NA
+## 5                 NA
+## 6                 NA
+## 7                 NA
+## 8                 NA
+## 9                 NA
+## 10                NA
+## 11                NA
+## 12                NA
+## 13                NA
+## 14                NA
+## 15                NA
+## 16                NA
+## 17                NA
+## 18                NA
+## 19                NA
+## 20                NA
+## 21                NA
+## 22                NA
+## 23                NA
+## 24                NA
+## 25                NA
+## 26                NA
+## 27                NA
+## 28                NA
+## 29                NA
+## 30                NA
+## 31                NA
+## 32                NA
+## 33                NA
+## 34                NA
+## 35                NA
+## 36                NA
+## 37                NA
+## 38                NA
+## 39                NA
+## 40                NA
+## 41                NA
+## 42                NA
+## 43                NA
+## 44                NA
+## 45                NA
+## 46                NA
+## 47                NA
+## 48                NA
+## 49                NA
+## 50                NA
+## 51                NA
+## 52                NA</code></pre>
+<pre class="r"><code># Graphing data
+
+plt1 &lt;- ggplot(data = fil_data, mapping = aes(x = State, 
+                                              y = Deaths, 
+                                              fill = State)) +
+geom_col() +
+theme(legend.position = &quot;none&quot;, axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
+  labs(title = &quot;Breast Cancer Death Rate Per State&quot;,
+          x = &quot;State&quot;, y = &quot;Deaths per hundred thousand&quot;,
+          caption = &quot;Source: U.S. Chronic Disease Indicators (CDI), 2023 Release&quot;)
+
+
+ggsave(plot = plt1, filename = &quot;BreastCancerPlot.png&quot;)</code></pre>
+<pre><code>## Saving 7 x 5 in image</code></pre>
+<pre class="r"><code>plt1</code></pre>
+<p><img src="data:image/png;base64,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" width="672" /></p>
 
 
 
